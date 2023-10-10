@@ -11,7 +11,6 @@ import com.google.android.material.button.MaterialButton;
 
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.Scriptable;
-
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
     TextView data_input, data_result;
@@ -20,10 +19,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     MaterialButton btn_divide, btn_plus, btn_minus, btn_multiply, btn_per;
     MaterialButton button_0, button_1, button_2, button_3, button_4, button_5, button_6, button_7, button_8, button_9;
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
 
         // Initialize TextViews for input and result
         data_input = findViewById(R.id.datainput);
@@ -51,13 +52,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         assignId(button_9, R.id.button9);
 
     }
-
     //Assigns a click listener to a MaterialButton and associates it with a given resource ID.
     //btn The MaterialButton to which the click listener will be assigned.
     //id  The resource ID of the MaterialButton.
     void assignId(MaterialButton btn, int id) {
         btn = findViewById(id); // Find the MaterialButton by its resource ID
         btn.setOnClickListener(this); // Assign the click listener to the MaterialButton
+
 
     }
 
@@ -80,7 +81,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         if (buttonText.equals("=")) {
             // Check if there's a valid expression to calculate
             if (!dataToCalculate.isEmpty()) {
-                // Remove any trailing operators at the end of the expression
+                // Ensure the last character is not an operator
                 while (isOperator(dataToCalculate.charAt(dataToCalculate.length() - 1))) {
                     dataToCalculate = dataToCalculate.substring(0, dataToCalculate.length() - 1);
                 }
@@ -93,6 +94,18 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             if (!dataToCalculate.isEmpty()) {
                 dataToCalculate = dataToCalculate.substring(0, dataToCalculate.length() - 1);
             }
+        } else if (isOperator(buttonText.charAt(0))) {
+            // Check if the last character is an operator and replace it
+            if (!dataToCalculate.isEmpty() && isOperator(dataToCalculate.charAt(dataToCalculate.length() - 1))) {
+                dataToCalculate = dataToCalculate.substring(0, dataToCalculate.length() - 1);
+            }
+            dataToCalculate += buttonText;
+        } else if (buttonText.equals("%")) {
+            // Check if the last character is a number and interpret it as a percentage
+            if (!dataToCalculate.isEmpty() && Character.isDigit(dataToCalculate.charAt(dataToCalculate.length() - 1))) {
+                double value = Double.parseDouble(dataToCalculate) / 100.0;
+                dataToCalculate = String.valueOf(value);
+            }
         } else {
             dataToCalculate += buttonText;
         }
@@ -100,15 +113,24 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         data_input.setText(dataToCalculate); // Update data_input for non-equal buttons
     }
 
-    // Helper function to check if a character is an operator (+, -, *, /, %)
-    private boolean isOperator(char c) {
-        return c == '+' || c == '-' || c == '*' || c == '/' || c == '%';
+
+
+
+
+    // Helper function to remove the last operator from the input string
+    private String removeLastOperator(String input) {
+        if (input.length() > 0 && isOperator(input.charAt(input.length() - 1))) {
+            return input.substring(0, input.length() - 1);
+        }
+        return input;
     }
 
 
 
-
-
+    // Helper function to check if a character is an operator (+, -, *, /, %)
+    private boolean isOperator(char c) {
+        return c == '+' || c == '-' || c == '*' || c == '/';
+    }
 
     String getResult(String data) {
         try {
@@ -136,6 +158,4 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             Context.exit();
         }
     }
-
-
 }
